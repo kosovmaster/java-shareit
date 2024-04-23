@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserServiceDao;
+import ru.practicum.shareit.user.service.UserServiceDaoImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class ItemServiceDtoImpl implements ItemServiceDto {
 
     private final ItemServiceDao itemServiceDao;
-    private final UserServiceDao userServiceDao;
+    private final UserServiceDaoImpl userServiceDao;
 
     @Override
     public ItemDto addItem(Integer userId, ItemDto itemDto) {
@@ -36,8 +36,8 @@ public class ItemServiceDtoImpl implements ItemServiceDto {
         userServiceDao.findById(userId);
         Optional<Item> itemGet = itemServiceDao.findItemById(itemId);
         if (itemGet.isEmpty()) {
-            throw new NotFoundException(String.format("У пользователя с id %s не "
-                    + "существует вещи с id %s", userId, itemId));
+            throw new NotFoundException(String.format("У пользователя с id %s не " +
+                    "существует вещи с id %s", userId, itemId));
         }
         return ItemMapper.toItemDto(itemGet.get());
     }
@@ -69,8 +69,8 @@ public class ItemServiceDtoImpl implements ItemServiceDto {
         Optional<Item> itemOptional = itemServiceDao.findItemById(itemId);
         if (itemOptional.isPresent()) {
             if (!itemOptional.get().getOwner().equals(userId)) {
-                throw new NotFoundException(String.format("Пользователь с id %s не "
-                        + "является владельцем с id %s", userId, itemId));
+                throw new NotFoundException(String.format("Пользователь с id %s " +
+                        "не является владельцем вещи id %s.", userId, itemId));
             }
             Item storageItem = itemOptional.get();
             Item item = ItemMapper.toItem(itemDto);

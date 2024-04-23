@@ -18,9 +18,9 @@ public class ItemServiceDaoImpl implements ItemServiceDao {
     public Item addItem(Item item) {
         item.setId(id);
         id++;
-        List<Item> listItems = new ArrayList<>();
-        listItems.add(item);
-        items.put(item.getOwner(), listItems);
+        List<Item> itemList = new ArrayList<>();
+        itemList.add(item);
+        items.put(item.getOwner(), itemList);
         return item;
     }
 
