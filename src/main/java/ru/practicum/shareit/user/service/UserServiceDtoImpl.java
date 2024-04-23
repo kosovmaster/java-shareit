@@ -2,8 +2,8 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exection.NotFoundException;
-import ru.practicum.shareit.exection.NotUniqueEmailException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.NotUniqueEmailException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -27,7 +27,7 @@ public class UserServiceDtoImpl implements UserServiceDto {
     @Override
     public UserDto findById(Integer id) {
         if (!isUserInMemory(id)) {
-            throw new NotFoundException("Пользователь с id: " + id + "не найден");
+            throw new NotFoundException("Пользователь с id: " + id + " не найден");
         }
         User user = userServiceDao.findById(id);
         return UserMapper.toUserDto(user);
@@ -36,7 +36,7 @@ public class UserServiceDtoImpl implements UserServiceDto {
     @Override
     public UserDto updateUser(Integer id, UserDto userDto) {
         if (!isUserInMemory(id)) {
-            throw new NotFoundException("Пользователь с id: " + id + "не найден");
+            throw new NotFoundException("Пользователь с id: " + id + " не найден");
         }
         User user = new User();
         UserDto userFromMemory = findById(id);
@@ -68,7 +68,7 @@ public class UserServiceDtoImpl implements UserServiceDto {
         if (isUserInMemory(id)) {
             userServiceDao.deleteUser(id);
         } else {
-            throw new NotFoundException("Пользователь с id: " + id + "не найден");
+            throw new NotFoundException("Пользователь с id: " + id + " не найден");
         }
     }
 

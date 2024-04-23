@@ -2,8 +2,8 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exection.NotFoundException;
-import ru.practicum.shareit.exection.NotUniqueEmailException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.NotUniqueEmailException;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;
@@ -59,7 +59,7 @@ public class UserServiceDaoImpl implements UserServiceDao {
 
     private void checkUserInMemory(Integer id) {
         if (!users.containsKey(id)) {
-            throw new NotFoundException("Пользователь с id: " + id + "не найден");
+            throw new NotFoundException("Пользователь с id: " + id + " не найден");
         }
     }
 

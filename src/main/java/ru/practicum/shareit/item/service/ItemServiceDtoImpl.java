@@ -2,13 +2,13 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exection.NotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserServiceDaoImpl;
+import ru.practicum.shareit.user.service.UserServiceDao;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class ItemServiceDtoImpl implements ItemServiceDto {
 
     private final ItemServiceDao itemServiceDao;
-    private final UserServiceDaoImpl userServiceDao;
+    private final UserServiceDao userServiceDao;
 
     @Override
     public ItemDto addItem(Integer userId, ItemDto itemDto) {
