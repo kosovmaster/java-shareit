@@ -13,27 +13,27 @@ import java.util.*;
 public class UserServiceDaoImpl implements UserServiceDao {
     private final Map<Integer, User> users = new HashMap<>();
     private final Set<String> emails = new HashSet<>();
-    private Integer idGenerator = 1;
+    private Integer id = 1;
 
     @Override
     public User addUser(User user) {
-        checkEmail(user);
-        user.setId(idGenerator);
-        users.put(idGenerator, user);
+        emailIsExist(user);
+        user.setId(id);
+        users.put(id, user);
         emails.add(user.getEmail());
-        idGenerator++;
+        id++;
         return user;
     }
 
     @Override
     public User findById(Integer id) {
-        checkUserInMemory(id);
+        isExist(id);
         return users.get(id);
     }
 
     @Override
     public User updateUser(Integer id, User user) {
-        checkUserInMemory(id);
+        isExist(id);
         updateEmail(findById(id).getEmail(), user.getEmail());
         users.put(id, user);
         return users.get(id);
@@ -46,18 +46,18 @@ public class UserServiceDaoImpl implements UserServiceDao {
 
     @Override
     public void deleteUser(Integer id) {
-        checkUserInMemory(id);
+        isExist(id);
         emails.remove(findById(id).getEmail());
         users.remove(id);
     }
 
-    private void checkEmail(User user) {
+    private void emailIsExist(User user) {
         if (emails.contains(user.getEmail())) {
             throw new NotUniqueEmailException("Пользователь с такой электронной почтой уже существует");
         }
     }
 
-    private void checkUserInMemory(Integer id) {
+    private void isExist(Integer id) {
         if (!users.containsKey(id)) {
             throw new NotFoundException("Пользователь с id: " + id + " не найден");
         }

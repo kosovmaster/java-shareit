@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceDtoImpl implements UserServiceDto {
+public class UserServiceImpl implements UserService {
 
     private final UserServiceDao userServiceDao;
 
