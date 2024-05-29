@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class CommentDto {
     private Long id;
     @NotBlank

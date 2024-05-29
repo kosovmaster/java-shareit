@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -9,6 +10,7 @@ import ru.practicum.shareit.booking.validator.BookingDtoCreate;
 import ru.practicum.shareit.booking.validator.state.ValidState;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.Collection;
@@ -26,6 +28,7 @@ public class BookingController {
     public static final String USER_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public BookingDto createBooking(@Valid @RequestBody BookingDtoCreate bookingDtoCreate,
                                     @RequestHeader(USER_HEADER) Long userId) {
         return bookingService.createBooking(userId, bookingDtoCreate);
@@ -46,15 +49,17 @@ public class BookingController {
 
     @GetMapping
     public Collection<BookingDto> getAllBookingsBooker(@RequestHeader(USER_HEADER) Long userId,
-                                                       @RequestParam(defaultValue = "ALL")
-                                                       @ValidState String state) {
-        return bookingService.getAllBookingBooker(userId, BookingState.valueOf(state));
+                                                       @RequestParam(defaultValue = "ALL") @ValidState String state,
+                                                       @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                       @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+        return bookingService.getAllBookingBooker(userId, BookingState.valueOf(state), from, size);
     }
 
     @GetMapping("/owner")
     public Collection<BookingDto> getAllBookingsOwner(@RequestHeader(USER_HEADER) Long userId,
-                                                      @RequestParam(defaultValue = "ALL")
-                                                      @ValidState String state) {
-        return bookingService.getAllBookingOwner(userId, BookingState.valueOf(state));
+                                                      @RequestParam(defaultValue = "ALL") @ValidState String state,
+                                                      @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                      @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+        return bookingService.getAllBookingOwner(userId, BookingState.valueOf(state), from, size);
     }
 }

@@ -2,6 +2,10 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
@@ -26,45 +30,44 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         try {
-            User createdUser = userRepository.saveAndFlush(userMapper.toUser(userDto));
-            log.info("Пользователь был создан={}", createdUser);
+            User createdUser = userRepository.save(userMapper.toUser(userDto));
+            log.info("User has been created={}", createdUser);
             return userMapper.toUserDto(createdUser);
-        } catch (Exception e) {
-            throw new ConflictException(e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            String errorMessage = e.getMostSpecificCause().getMessage();
+            log.warn("The user has not been created due to data integrity violation: {}", errorMessage);
+            if (errorMessage != null && errorMessage.contains("PUBLIC.USERS(EMAIL")) {
+                throw new ConflictException("The email " + userDto.getEmail() + " is already in exists");
+            } else {
+                throw new ConflictException("The user has not been created: " + userDto + ". Error: " + errorMessage);
+            }
         }
     }
 
     @Transactional(readOnly = true)
     @Override
-    public UserDto getUserDtoById(Long userId) {
-        return userRepository.findById(userId)
-                .map(userMapper::toUserDto)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+    public UserDto getUserById(Long userId) {
+        User user = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+        return userMapper.toUserDto(user);
     }
 
     @Transactional
     @Override
-    public UserDto updateUser(Long userId, UserDto userDto) {
-        User user = userRepository.findById(userId).stream().findFirst().orElse(null);
-        if (user == null) {
+    public UserDto updateUser(Long userId, UserDto userDtoNew) {
+        User userOld = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
             throw new ValidationException("Пользователь с id: " + userId + " уже существует");
-        }
-        isExistEmail(userDto.getEmail(), user.getEmail());
-        User updatedUser = userRepository.save(setUser(user, userDto));
+        });
+
+        getExceptionIfEmailExistsAndItIsAlien(userDtoNew.getEmail(), userOld.getEmail());
+        User updatedUser = userRepository.save(setUser(userOld, userDtoNew));
         return userMapper.toUserDto(updatedUser);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Collection<UserDto> getAllUser() {
-        List<User> users = userRepository.findAll();
+    public Collection<UserDto> getAllUser(Integer from, Integer size) {
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.asc("id")));
+        List<User> users = userRepository.findAll(pageable).getContent();
         return userMapper.toUserDtoCollection(users);
     }
 
@@ -75,9 +78,13 @@ public class UserServiceImpl implements UserService {
         log.warn("Пользователь с id: " + userId + " был удален");
     }
 
-    private void isExistEmail(String emailNew, String emailOld) {
-        if (userRepository.existsByEmail(emailNew) && !emailNew.equals(emailOld)) {
-            throw new ConflictException("Пользователь с такой электронной почтой = " + emailNew + " уже существует");
+    private void getExceptionIfEmailExistsAndItIsAlien(String emailNew, String emailOld) {
+        if (emailNew == null) {
+            return;
+        }
+        boolean isExistEmail = userRepository.existsByEmail(emailNew);
+        if (isExistEmail && !emailNew.equals(emailOld)) {
+            throw new ConflictException("Пользователь с email: " + emailNew + " уже существует");
         }
     }
 

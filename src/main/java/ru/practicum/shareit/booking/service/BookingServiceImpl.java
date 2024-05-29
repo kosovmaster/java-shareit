@@ -1,6 +1,10 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -11,10 +15,10 @@ import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.validator.BookingDtoCreate;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.UserRepository;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
@@ -24,18 +28,19 @@ import static ru.practicum.shareit.booking.BookingStatus.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService {
-    private final UserService userService;
-    private final ItemService itemService;
     private final BookingMapper bookingMapper;
     private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     @Override
     public BookingDto createBooking(Long userId, BookingDtoCreate bookingDtoCreate) {
-        User booker = userService.getUserById(userId);
-        Item item = itemService.getItemByIdAvailable(bookingDtoCreate.getItemId(), userId);
-        isBooker(userId, item);
+        User booker = getUserIfExists(userId);
+        Item item = getAvailableItemByIdIfItExists(bookingDtoCreate.getItemId(), userId);
+        getExceptionIfUserIsNotBooker(userId, item);
         Booking booking = bookingRepository.save(bookingMapper.toBooking(bookingDtoCreate, booker, item));
         return bookingMapper.toBookingDto(booking);
     }
@@ -43,10 +48,10 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingDto updateBooking(Long userId, Long bookingId, Boolean approved) {
-        Booking booking = isBookingExistAndNotWaiting(userId, bookingId);
+        Booking booking = getBookingNotWaitingIfItExists(userId, bookingId);
         BookingStatus status = approved ? APPROVED : REJECTED;
         booking.setStatus(status);
-        isOwner(userId, booking);
+        getExceptionIfUserIsNotOwner(userId, booking);
         Booking bookingUpdated = bookingRepository.save(booking);
         return bookingMapper.toBookingDto(bookingUpdated);
     }
@@ -60,78 +65,95 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public Collection<BookingDto> getAllBookingBooker(Long userId, BookingState state) {
+    public Collection<BookingDto> getAllBookingBooker(Long userId, BookingState state, Integer from, Integer size) {
         if (state == null) {
             throw new ValidationException("Статус не может быть null");
         }
-        userService.getUserById(userId);
-        Collection<Booking> bookings = getBookingsForBooker(state, userId);
+        getUserIfExists(userId);
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("start")));
+        Collection<Booking> bookings = getBookingsForBooker(state, userId, pageable);
         return bookingMapper.toBookingDtoCollection(bookings);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Collection<BookingDto> getAllBookingOwner(Long userId, BookingState state) {
+    public Collection<BookingDto> getAllBookingOwner(Long userId, BookingState state, Integer from, Integer size) {
         if (state == null) {
             throw new ValidationException("Статус не может быть null");
         }
-        userService.getUserById(userId);
-        Collection<Booking> bookings = getBookingsForOwner(state, userId);
+        getUserIfExists(userId);
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("start")));
+        Collection<Booking> bookings = getBookingsForOwner(state, userId, pageable);
         return bookingMapper.toBookingDtoCollection(bookings);
     }
 
-    private void isBooker(Long userId, Item item) {
+    private void getExceptionIfUserIsNotBooker(Long userId, Item item) {
         if (item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Владелец не может зарезервировать этот предмет");
+            log.warn("The owner id={} is trying to reserve his item id={}", userId, item.getOwner().getId());
+            throw new NotFoundException("The owner cannot booking his item");
         }
     }
 
-    private void isOwner(Long userId, Booking booking) {
+    private void getExceptionIfUserIsNotOwner(Long userId, Booking booking) {
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             throw new NotFoundException("id = " + booking.getId() + " не найден");
         }
     }
 
-    private Collection<Booking> getBookingsForOwner(BookingState state, Long userId) {
+    private Collection<Booking> getBookingsForOwner(BookingState state, Long userId, Pageable pageable) {
         LocalDateTime current = LocalDateTime.now();
         switch (state) {
             case PAST:
-                return bookingRepository.findAllByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, current);
+                return bookingRepository.findAllByItem_Owner_IdAndEndBefore(userId, current, pageable);
             case FUTURE:
-                return bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, current);
+                return bookingRepository.findAllByItem_Owner_IdAndStartAfter(userId, current, pageable);
             case WAITING:
-                return bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, WAITING);
+                return bookingRepository.findAllByItem_Owner_IdAndStatus(userId, WAITING, pageable);
             case REJECTED:
-                return bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, REJECTED);
-            case CURRENT:
-                return bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, current, current);
-        }
-        return bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
-    }
-
-    private Collection<Booking> getBookingsForBooker(BookingState state, Long userId) {
-        LocalDateTime current = LocalDateTime.now();
-        switch (state) {
-            case PAST:
-                return bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, current);
-            case FUTURE:
-                return bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, current);
-            case WAITING:
-                return bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, WAITING);
-            case REJECTED:
-                return bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, REJECTED);
+                return bookingRepository.findAllByItem_Owner_IdAndStatus(userId, REJECTED, pageable);
             case CURRENT:
                 return bookingRepository
-                        .findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, current, current);
+                        .findAllByItem_Owner_IdAndStartBeforeAndEndAfter(userId, current, current, pageable);
         }
-        return bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
+        return bookingRepository.findAllByItem_Owner_Id(userId, pageable);
     }
 
-    private Booking isBookingExistAndNotWaiting(Long userId, Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("id = " + bookingId + " не найден"));
+    private Collection<Booking> getBookingsForBooker(BookingState state, Long userId, Pageable pageable) {
+        LocalDateTime current = LocalDateTime.now();
+        switch (state) {
+            case PAST:
+                return bookingRepository.findAllByBooker_IdAndEndBefore(userId, current, pageable);
+            case FUTURE:
+                return bookingRepository.findAllByBooker_IdAndStartAfter(userId, current, pageable);
+            case WAITING:
+                return bookingRepository.findAllByBooker_IdAndStatus(userId, WAITING, pageable);
+            case REJECTED:
+                return bookingRepository.findAllByBooker_IdAndStatus(userId, REJECTED, pageable);
+            case CURRENT:
+                return bookingRepository
+                        .findAllByBooker_IdAndStartBeforeAndEndAfter(userId, current, current, pageable);
+        }
+        return bookingRepository.findAllByBooker_Id(userId, pageable);
+    }
+
+    private User getUserIfExists(Long userId) {
+        return userRepository.findById(userId).stream().findFirst().orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+    }
+
+    private Booking getBookingNotWaitingIfItExists(Long userId, Long bookingId) {
+        log.warn("Booking id={} user id={} not found", bookingId, userId);
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Резевр с id = " + bookingId + " не найден"));
         if (!booking.getStatus().equals(WAITING)) {
-            throw new ValidationException("Статус зарезервированного предмета не WAITING");
+            throw new ValidationException("Статус резерва не WAITING");
         }
         return booking;
+    }
+
+    private Item getAvailableItemByIdIfItExists(Long itemId, Long userId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет с данным id = " + itemId + " не найден"));
+        if (item.getAvailable().equals(false)) {
+            throw new ValidationException("Предмет с данным id = " + itemId + " не найден или не доступен");
+        }
+        return item;
     }
 }

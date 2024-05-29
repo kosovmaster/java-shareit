@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.validator.BookingDtoInfo;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.util.Collection;
@@ -18,16 +19,18 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
+                .requestId(item.getRequest() == null ? null : item.getRequest().getId())
                 .build();
     }
 
-    public Item toItem(ItemDto itemDto, User owner) {
+    public Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest) {
         return Item.builder()
                 .id(itemDto.getId())
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
                 .owner(owner)
+                .request(itemRequest)
                 .build();
     }
 
