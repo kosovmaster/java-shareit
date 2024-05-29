@@ -52,7 +52,7 @@ public class ItemRequestDtoInfoTest {
     @SneakyThrows
     public void deserialize() {
         ItemRequestDtoInfo itemRequestDtoInfo = new ItemRequestDtoInfo(null, "need shovel", FIXED_TIME, List.of(new ItemDto(null, "shovel", "sand shovel", true, null)));
-        var resource = new ClassPathResource("ItemRequestDtoInfo.json");
+        var resource = new ClassPathResource("itemRequestDtoInfo.json");
         String content = Files.readString(resource.getFile().toPath());
         assertThat(this.json.parse(content)).isEqualTo(itemRequestDtoInfo);
     }
