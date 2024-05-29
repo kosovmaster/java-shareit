@@ -92,7 +92,7 @@ public class ItemRequestServiceImplTest {
 
     @DisplayName("Тест на исключение при неверном возврате запроса по id")
     @Test
-    public void NotGetItemRequestByIdTest() {
+    public void notGetItemRequestByIdTest() {
         UserDto userDto = userService.createUser(userDtoFirst);
         long requestId = 10L;
 
