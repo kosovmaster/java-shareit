@@ -17,8 +17,8 @@ import ru.practicum.shareit.booking.validator.BookingDtoCreate;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;

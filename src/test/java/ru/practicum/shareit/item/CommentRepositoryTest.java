@@ -12,11 +12,10 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -60,9 +59,9 @@ public class CommentRepositoryTest {
     @DisplayName("Тест возврата всех комментариев по id вещи")
     @Test
     public void findAllByItemId() {
-        List<Comment> resultOne = commentRepository.findAllByItemId(itemFirst.getId()).orElse(new ArrayList<>());
-        List<Comment> resultTwo = commentRepository.findAllByItemId(itemSecond.getId()).orElse(new ArrayList<>());
-        List<Comment> resultThree = commentRepository.findAllByItemId(-1L).orElse(new ArrayList<>());
+        List<Comment> resultOne = commentRepository.findAllByItemId(itemFirst.getId());
+        List<Comment> resultTwo = commentRepository.findAllByItemId(itemSecond.getId());
+        List<Comment> resultThree = commentRepository.findAllByItemId(-1L);
 
         assertThat(resultOne, hasSize(1));
         assertThat(resultOne, is(equalTo(List.of(commentOne))));
@@ -74,9 +73,9 @@ public class CommentRepositoryTest {
     @DisplayName("Тест возврата всех комментариев для переданных id вещей")
     @Test
     public void findAllByItemIdIn() {
-        List<Comment> resultOne = commentRepository.findAllByItemIdIn(List.of(itemSecond.getId(), itemFirst.getId())).orElse(new ArrayList<>());
-        List<Comment> resultTwo = commentRepository.findAllByItemIdIn(List.of(itemSecond.getId())).orElse(new ArrayList<>());
-        List<Comment> resultThree = commentRepository.findAllByItemIdIn(List.of(0L)).orElse(new ArrayList<>());
+        List<Comment> resultOne = commentRepository.findAllByItemIdIn(List.of(itemSecond.getId(), itemFirst.getId()));
+        List<Comment> resultTwo = commentRepository.findAllByItemIdIn(List.of(itemSecond.getId()));
+        List<Comment> resultThree = commentRepository.findAllByItemIdIn(List.of(0L));
 
         assertThat(resultOne, hasSize(3));
         assertThat(resultOne, Matchers.is(equalTo(List.of(commentOne, commentTwo, commentThree))));

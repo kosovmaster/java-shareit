@@ -23,8 +23,8 @@ import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
@@ -60,11 +60,10 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.toItemDto(item);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public ItemDtoInfo findItemById(Long userId, Long itemId) {
         Item item = getItemById(itemId, userId);
-        List<Comment> comments = commentRepository.findAllByItemId(itemId).orElse(new ArrayList<>());
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
         Map<Long, List<CommentDto>> commentsItem = getCommentDtoSortByIdItem(comments);
 
         boolean isOwner = itemRepository.existsByIdAndOwner_Id(itemId, userId);
@@ -76,13 +75,12 @@ public class ItemServiceImpl implements ItemService {
         return setBookingForOwner(List.of(item), List.of(itemId), commentsItem).stream().findFirst().orElse(null);
     }
 
-    @Transactional
     @Override
     public Collection<ItemDtoInfo> getAllItemUser(Long userId, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.asc("id")));
         List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
         List<Long> itemsId = items.stream().map(Item::getId).collect(Collectors.toList());
-        List<Comment> comments = commentRepository.findAllByItemIdIn(itemsId).orElse(new ArrayList<>());
+        List<Comment> comments = commentRepository.findAllByItemIdIn(itemsId);
         Map<Long, List<CommentDto>> commentsItems = getCommentDtoSortByIdItem(comments);
         return setBookingForOwner(items, itemsId, commentsItems);
     }

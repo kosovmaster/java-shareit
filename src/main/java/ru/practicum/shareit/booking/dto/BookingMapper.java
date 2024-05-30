@@ -7,8 +7,8 @@ import ru.practicum.shareit.booking.validator.BookingDtoCreate;
 import ru.practicum.shareit.booking.validator.BookingDtoInfo;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +24,10 @@ public class BookingMapper {
     private final UserMapper userMapper;
 
     public BookingDto toBookingDto(Booking booking) {
+        if (booking == null) {
+            throw new NullPointerException("booking cannot be null");
+        }
+
         return BookingDto.builder()
                 .id(booking.getId())
                 .start(booking.getStart())
@@ -35,12 +39,20 @@ public class BookingMapper {
     }
 
     public Collection<BookingDto> toBookingDtoCollection(Collection<Booking> booking) {
+        if (booking == null) {
+            throw new NullPointerException("booking cannot be null");
+        }
+
         return booking.stream()
                 .map(this::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     public Booking toBooking(BookingDtoCreate bookingDtoCreate, User user, Item item) {
+        if (bookingDtoCreate == null || user == null || item == null) {
+            throw new NullPointerException("bookingDtoCreate, user, and item cannot be null");
+        }
+
         return Booking.builder()
                 .start(bookingDtoCreate.getStart())
                 .end(bookingDtoCreate.getEnd())
@@ -51,6 +63,10 @@ public class BookingMapper {
     }
 
     public BookingDtoInfo toBookingDtoInfo(Booking booking) {
+        if (booking == null) {
+            throw new NullPointerException("booking cannot be null");
+        }
+
         return BookingDtoInfo.builder()
                 .id(booking.getId())
                 .bookerId(booking.getBooker().getId())
@@ -62,12 +78,20 @@ public class BookingMapper {
     }
 
     public List<BookingDtoInfo> toBookingDtoInfoList(List<Booking> bookings) {
+        if (bookings == null) {
+            throw new NullPointerException("bookings cannot be null");
+        }
+
         return bookings.stream()
                 .map(this::toBookingDtoInfo)
                 .collect(Collectors.toList());
     }
 
     public Map<Long, BookingDtoInfo> toBookingDtoInfoMapByIdItem(List<BookingDtoInfo> booking) {
+        if (booking == null) {
+            throw new NullPointerException("booking cannot be null");
+        }
+
         return booking.stream().collect(Collectors.toMap(
                 BookingDtoInfo::getItemId, bookingDtoInfo -> bookingDtoInfo));
     }
