@@ -18,7 +18,7 @@ public class ItemRequestMapper {
 
     public ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User requester, LocalDateTime created) {
         if (itemRequestDto == null || requester == null || created == null) {
-            throw new NullPointerException("itemRequestDto, requester, and created cannot be null");
+            return null;
         }
 
         return ItemRequest.builder()
@@ -30,7 +30,7 @@ public class ItemRequestMapper {
 
     public List<ItemRequestDtoInfo> toItemRequestDtoInfoList(List<ItemRequest> itemRequests) {
         if (itemRequests == null) {
-            throw new NullPointerException("itemRequests cannot be null");
+            return null;
         }
 
         return itemRequests.stream()
@@ -40,7 +40,7 @@ public class ItemRequestMapper {
 
     public ItemRequestDtoInfo toItemRequestDtoInfo(ItemRequest itemRequest) {
         if (itemRequest == null) {
-            throw new NullPointerException("itemRequest cannot be null");
+            return null;
         }
 
         return ItemRequestDtoInfo.builder()

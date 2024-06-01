@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ItemMapper {
     public ItemDto toItemDto(Item item) {
         if (item == null) {
-            throw new NullPointerException("item cannot be null");
+            return null;
         }
 
         return ItemDto.builder()
@@ -31,7 +31,7 @@ public class ItemMapper {
 
     public Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest) {
         if (itemDto == null || owner == null) {
-            throw new NullPointerException("itemDto and owner cannot be null");
+            return null;
         }
 
         return Item.builder()
@@ -46,7 +46,7 @@ public class ItemMapper {
 
     public ItemDtoInfo toOneItemDtoInfoForAllUsers(Item item, List<CommentDto> comments) {
         if (item == null) {
-            throw new NullPointerException("item cannot be null");
+            return null;
         }
 
         return ItemDtoInfo.builder()
@@ -60,7 +60,7 @@ public class ItemMapper {
 
     public ItemDtoInfo toOneItemDtoInfoForOwner(Item item, BookingDtoInfo next, BookingDtoInfo last, List<CommentDto> comments) {
         if (item == null) {
-            throw new NullPointerException("item cannot be null");
+            return null;
         }
 
         return ItemDtoInfo.builder()
@@ -76,7 +76,7 @@ public class ItemMapper {
 
     public Collection<ItemDto> toItemDtoCollection(Collection<Item> items) {
         if (items == null) {
-            throw new NullPointerException("items cannot be null");
+            return null;
         }
 
         return items.stream()

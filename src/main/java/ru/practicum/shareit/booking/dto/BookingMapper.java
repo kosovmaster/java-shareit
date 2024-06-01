@@ -25,7 +25,7 @@ public class BookingMapper {
 
     public BookingDto toBookingDto(Booking booking) {
         if (booking == null) {
-            throw new NullPointerException("booking cannot be null");
+            return null;
         }
 
         return BookingDto.builder()
@@ -40,7 +40,7 @@ public class BookingMapper {
 
     public Collection<BookingDto> toBookingDtoCollection(Collection<Booking> booking) {
         if (booking == null) {
-            throw new NullPointerException("booking cannot be null");
+            return null;
         }
 
         return booking.stream()
@@ -50,7 +50,7 @@ public class BookingMapper {
 
     public Booking toBooking(BookingDtoCreate bookingDtoCreate, User user, Item item) {
         if (bookingDtoCreate == null || user == null || item == null) {
-            throw new NullPointerException("bookingDtoCreate, user, and item cannot be null");
+            return null;
         }
 
         return Booking.builder()
@@ -64,7 +64,7 @@ public class BookingMapper {
 
     public BookingDtoInfo toBookingDtoInfo(Booking booking) {
         if (booking == null) {
-            throw new NullPointerException("booking cannot be null");
+            return null;
         }
 
         return BookingDtoInfo.builder()
@@ -79,7 +79,7 @@ public class BookingMapper {
 
     public List<BookingDtoInfo> toBookingDtoInfoList(List<Booking> bookings) {
         if (bookings == null) {
-            throw new NullPointerException("bookings cannot be null");
+            return null;
         }
 
         return bookings.stream()
@@ -89,7 +89,7 @@ public class BookingMapper {
 
     public Map<Long, BookingDtoInfo> toBookingDtoInfoMapByIdItem(List<BookingDtoInfo> booking) {
         if (booking == null) {
-            throw new NullPointerException("booking cannot be null");
+            return null;
         }
 
         return booking.stream().collect(Collectors.toMap(
