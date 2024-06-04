@@ -14,6 +14,8 @@ import javax.validation.constraints.Size;
 @ToString
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 public class UserDto {
     @Positive(groups = Update.class)
     private Long id;

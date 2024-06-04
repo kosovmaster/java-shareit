@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
+@EqualsAndHashCode
 @ToString
 @Builder
 @ValidBookingCreate

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.config.Create;
@@ -12,6 +13,7 @@ import ru.practicum.shareit.item.dto.ItemDtoInfo;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.Collection;
@@ -31,6 +33,7 @@ public class ItemController {
 
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createItem(@RequestHeader(USER_HEADER) Long userId, @Validated(Create.class) @RequestBody ItemDto itemDto) {
         log.info("POST запрос на добавление пользователя с id - " + userId + " предмета " + itemDto.toString());
         return itemService.createItem(userId, itemDto);
@@ -44,15 +47,19 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDtoInfo> findAll(@RequestHeader(USER_HEADER) Long userId) {
+    public Collection<ItemDtoInfo> findAll(@RequestHeader(USER_HEADER) Long userId,
+                                           @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                           @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         log.info("GET запрос на получение вещей пользователя с id - " + userId);
-        return itemService.getAllItemUser(userId);
+        return itemService.getAllItemUser(userId, from, size);
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchItem(@RequestParam String text) {
+    public Collection<ItemDto> searchItem(@RequestParam String text,
+                                          @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                          @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         log.info("GET запрос на поиск предметов");
-        return itemService.searchItem(text);
+        return itemService.searchItem(text, from, size);
     }
 
     @GetMapping("/{itemId}")
