@@ -22,23 +22,24 @@ public class ItemRequestClient extends BaseClient {
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
                         .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build());
-    }
-
-    public ResponseEntity<Object> getItemRequestById(Long requestId, Long userId) {
-        return get("/" + requestId, userId);
-    }
-
-    public ResponseEntity<Object> getItemRequestsPageByPage(Integer from, Integer size, Long userId) {
-        Map<String, Object> param = Map.of("from", from, "size", size);
-        return get("/all?from={from}&size={size}", userId, param);
+                        .build()
+        );
     }
 
     public ResponseEntity<Object> createItemRequest(ItemRequestDto itemRequestDto, Long userId) {
         return post("", userId, itemRequestDto);
     }
 
-    public ResponseEntity<Object> getListRequestsForItemUser(Long userId) {
+    public ResponseEntity<Object> getItemRequestById(Long requestId, Long userId) {
+        return get("/" + requestId, userId);
+    }
+
+    public ResponseEntity<Object> getListOfRequestsForItemsUser(Long userId) {
         return get("", userId);
+    }
+
+    public ResponseEntity<Object> getAllItemRequests(Integer from, Integer size, Long userId) {
+        Map<String, Object> parameters = Map.of("from", from, "size", size);
+        return get("/all?from={from}&size={size}", userId, parameters);
     }
 }

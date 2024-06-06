@@ -8,16 +8,16 @@ import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @ToString
 @Builder
-@AllArgsConstructor
 @EqualsAndHashCode
 public class ItemDtoInfo {
     private Long id;
     private String name;
     private String description;
-    private boolean available;
-    private BookingDtoInfo nextBooking;
+    private Boolean available;
     private BookingDtoInfo lastBooking;
+    private BookingDtoInfo nextBooking;
     private List<CommentDto> comments;
 }

@@ -23,14 +23,35 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
-    private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    @Transactional(readOnly = true)
+    public UserDto getUserById(Long userId) {
+        User user = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
+            log.warn("User with id={} not found", userId);
+            throw new NotFoundException("User with id=" + userId + " not found");
+        });
+
+        log.info("The user was received by id={}", userId);
+        return userMapper.toUserDto(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Collection<UserDto> getAllUser(Integer from, Integer size) {
+        log.info("All users have been received");
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.asc("id")));
+        List<User> allUsers = userRepository.findAll(pageable).getContent();
+        return userMapper.toUserDtoCollection(allUsers);
+    }
 
     @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
         try {
             User createdUser = userRepository.save(userMapper.toUser(userDto));
+            log.info("User has been created={}", createdUser);
             return userMapper.toUserDto(createdUser);
         } catch (DataIntegrityViolationException e) {
             String errorMessage = e.getMostSpecificCause().getMessage();
@@ -43,38 +64,25 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public UserDto getUserById(Long userId) {
-        User user = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
-        return userMapper.toUserDto(user);
-    }
-
     @Transactional
     @Override
     public UserDto updateUser(Long userId, UserDto userDtoNew) {
         User userOld = userRepository.findById(userId).stream().findFirst().orElseThrow(() -> {
-            throw new ValidationException("Пользователь с id: " + userId + " уже существует");
+            log.warn("The user with this id={} not already exists", userId);
+            throw new ValidationException("The user with this id=" + userId + " not already exists");
         });
 
         getExceptionIfEmailExistsAndItIsAlien(userDtoNew.getEmail(), userOld.getEmail());
         User updatedUser = userRepository.save(setUser(userOld, userDtoNew));
+        log.info("User has been updated={}", updatedUser);
         return userMapper.toUserDto(updatedUser);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public Collection<UserDto> getAllUser(Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.asc("id")));
-        List<User> users = userRepository.findAll(pageable).getContent();
-        return userMapper.toUserDtoCollection(users);
     }
 
     @Transactional
     @Override
     public void deleteUserById(Long userId) {
+        log.info("User with id={} deleted", userId);
         userRepository.deleteById(userId);
-        log.warn("Пользователь с id: " + userId + " был удален");
     }
 
     private void getExceptionIfEmailExistsAndItIsAlien(String emailNew, String emailOld) {
@@ -83,7 +91,8 @@ public class UserServiceImpl implements UserService {
         }
         boolean isExistEmail = userRepository.existsByEmail(emailNew);
         if (isExistEmail && !emailNew.equals(emailOld)) {
-            throw new ConflictException("Пользователь с email: " + emailNew + " уже существует");
+            log.warn("The user with this email={} already exists", emailNew);
+            throw new ConflictException("The user with this email=" + emailNew + " already exists");
         }
     }
 

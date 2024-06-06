@@ -22,10 +22,6 @@ public class BookingMapper {
     private final UserMapper userMapper;
 
     public BookingDto toBookingDto(Booking booking) {
-        if (booking == null) {
-            return null;
-        }
-
         return BookingDto.builder()
                 .id(booking.getId())
                 .start(booking.getStart())
@@ -37,20 +33,12 @@ public class BookingMapper {
     }
 
     public Collection<BookingDto> toBookingDtoCollection(Collection<Booking> booking) {
-        if (booking == null) {
-            return null;
-        }
-
         return booking.stream()
                 .map(this::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     public Booking toBooking(BookingDtoCreate bookingDtoCreate, User user, Item item) {
-        if (bookingDtoCreate == null || user == null || item == null) {
-            return null;
-        }
-
         return Booking.builder()
                 .start(bookingDtoCreate.getStart())
                 .end(bookingDtoCreate.getEnd())
@@ -61,10 +49,6 @@ public class BookingMapper {
     }
 
     public BookingDtoInfo toBookingDtoInfo(Booking booking) {
-        if (booking == null) {
-            return null;
-        }
-
         return BookingDtoInfo.builder()
                 .id(booking.getId())
                 .bookerId(booking.getBooker().getId())
@@ -76,20 +60,12 @@ public class BookingMapper {
     }
 
     public List<BookingDtoInfo> toBookingDtoInfoList(List<Booking> bookings) {
-        if (bookings == null) {
-            return null;
-        }
-
         return bookings.stream()
                 .map(this::toBookingDtoInfo)
                 .collect(Collectors.toList());
     }
 
     public Map<Long, BookingDtoInfo> toBookingDtoInfoMapByIdItem(List<BookingDtoInfo> booking) {
-        if (booking == null) {
-            return null;
-        }
-
         return booking.stream().collect(Collectors.toMap(
                 BookingDtoInfo::getItemId, bookingDtoInfo -> bookingDtoInfo));
     }

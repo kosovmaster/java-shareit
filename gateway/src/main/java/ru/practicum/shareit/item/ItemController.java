@@ -16,37 +16,31 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
-import static ru.practicum.shareit.Constant.PAGE_FROM_DEFAULT;
-import static ru.practicum.shareit.Constant.PAGE_SIZE_DEFAULT;
+import static ru.practicum.shareit.Constant.*;
 
-/**
- * TODO Sprint add-controllers.
- */
-
-@Slf4j
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class ItemController {
-    public static final String USER_HEADER = "X-Sharer-User-Id";
     private final ItemClient itemClient;
 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> createItem(@RequestHeader(USER_HEADER) Long userId,
-                                             @Validated(Create.class) @RequestBody ItemDto itemDto) {
-        log.info("POST запрос на добавление пользователя с id - " + userId + " предмета " + itemDto.toString());
+    public ResponseEntity<Object> createItem(@Validated(Create.class) @RequestBody ItemDto itemDto,
+                                             @RequestHeader(USER_HEADER) Long userId) {
+        log.info("POST: user request with id={} to create a item, request body={}", userId, itemDto);
         return itemClient.createItem(itemDto, userId);
     }
 
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItem(@RequestHeader(USER_HEADER) Long userId,
-                                             @Validated(Update.class) @RequestBody ItemDto itemDto,
-                                             @PathVariable @Positive @NotNull Long itemId) {
-        log.info("PATCH запрос на обновление предмета с id - " + itemId + " у пользователя с id - " + userId);
+    public ResponseEntity<Object> updateItem(@Validated(Update.class) @RequestBody ItemDto itemDto,
+                                             @PathVariable @Positive @NotNull Long itemId,
+                                             @RequestHeader(USER_HEADER) Long userId) {
+        log.info("PATCH: user request with id={} to update a item, request body={}", userId, itemDto);
         return itemClient.updateItem(itemDto, itemId, userId);
     }
 
@@ -54,7 +48,7 @@ public class ItemController {
     public ResponseEntity<Object> findAll(@RequestHeader(USER_HEADER) Long userId,
                                           @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @Min(0) Integer from,
                                           @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Min(1) Integer size) {
-        log.info("GET запрос на получение вещей пользователя с id - " + userId);
+        log.info("GET: user request with id={} to view a items. Page from={}, page size={}", userId, from, size);
         return itemClient.findAll(userId, from, size);
     }
 
@@ -63,22 +57,23 @@ public class ItemController {
                                              @RequestHeader(USER_HEADER) Long userId,
                                              @RequestParam(defaultValue = PAGE_FROM_DEFAULT) @Min(0) Integer from,
                                              @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) @Min(1) Integer size) {
-        log.info("GET запрос на поиск предметов");
+        log.info("GET: user request with id={} to search a item with name or description={}", userId, text);
         return itemClient.searchItem(text, userId, from, size);
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<Object> findById(@RequestHeader(USER_HEADER) Long userId,
-                                           @PathVariable @Positive @NotNull Long itemId) {
-        log.info("GET запрос на получение предмета с id - " + itemId + " пользователя с id - " + userId);
-        return itemClient.findById(userId, itemId);
+    public ResponseEntity<Object> findById(@PathVariable @Positive @NotNull Long itemId,
+                                           @RequestHeader(USER_HEADER) Long userId) {
+        log.info("GET: user request with id={} to view a item with id={}", userId, itemId);
+        return itemClient.findById(itemId, userId);
     }
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> createComment(@Valid @RequestBody CommentDto commentDto,
                                                 @RequestHeader(USER_HEADER) Long userId,
                                                 @PathVariable @Positive @NotNull Long itemId) {
-        log.warn("POST запрос на создание комментария");
+        log.info("POST: user request with id={} to create a comment on an item with id={}, request body={}",
+                userId, itemId, commentDto);
         return itemClient.createComment(commentDto, userId, itemId);
     }
 }

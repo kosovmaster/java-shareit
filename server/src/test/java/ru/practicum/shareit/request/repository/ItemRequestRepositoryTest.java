@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.repository;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -39,15 +40,19 @@ public class ItemRequestRepositoryTest {
     @BeforeEach
     public void setUp() {
         userRepository.save(new User(null, "Ivan", "ivan@mail.ru"));
-        requesterOne = userRepository.save(new User(null, "John", "john@mail.ru"));
-        User requesterTwo = userRepository.save(new User(null, "Derek", "derek@mail.ru"));
+        requesterOne = userRepository.save(new User(null, "Lisa", "lisa@mail.ru"));
+        User requesterTwo = userRepository.save(new User(null, "Marina", "marina@mail.ru"));
 
-        requestOne = itemRequestRepository.save(new ItemRequest(null, "need shovel", requesterOne, LocalDateTime.now(), EMPTY_LIST));
-        requestTwo = itemRequestRepository.save(new ItemRequest(null, "need hammer", requesterOne, LocalDateTime.now().minusDays(1), EMPTY_LIST));
-        requestThree = itemRequestRepository.save(new ItemRequest(null, "need saw", requesterTwo, LocalDateTime.now(), EMPTY_LIST));
+        requestOne = itemRequestRepository.save(new ItemRequest(null, "need a saw", requesterOne,
+                LocalDateTime.now(), EMPTY_LIST));
+        requestTwo = itemRequestRepository.save(new ItemRequest(null, "need a rake", requesterOne,
+                LocalDateTime.now().minusDays(1), EMPTY_LIST));
+        requestThree = itemRequestRepository.save(new ItemRequest(null, "need a hoe", requesterTwo,
+                LocalDateTime.now(), EMPTY_LIST));
     }
 
-    @DisplayName("Тест поиска всех запросов по id с сортировкой по времени создания запроса от новых к старым")
+    @DisplayName("Должен вернуть все запросы по id пользователя делавшего эти запросы " +
+            "с сортировкой по времени создания запроса от более новых к старым")
     @Test
     public void findAllByRequester_IdOrderByCreatedDesc() {
         List<ItemRequest> result = itemRequestRepository.findAllByRequester_IdOrderByCreatedDesc(requesterOne.getId());
@@ -56,7 +61,7 @@ public class ItemRequestRepositoryTest {
         assertThat(result, Matchers.is(equalTo(List.of(requestOne, requestTwo))));
     }
 
-    @DisplayName("Тест поиска всех запросов, кроме запросов самого пользователя")
+    @DisplayName("Должен вернуть все запросы, кроме запросов самого пользователя")
     @Test
     public void findAllByRequester_IdNot() {
         Pageable pageable = getPageable(0, 10, "created");

@@ -1,10 +1,10 @@
 {
-  "description": "need shovel",
+  "description": "need hoe",
   "created": "2023-05-19T21:09:45",
   "items": [
     {
-      "name": "shovel",
-      "description": "sand shovel",
+      "name": "hoe",
+      "description": "garden hoe",
       "available": "true",
       "request": "null"
     }

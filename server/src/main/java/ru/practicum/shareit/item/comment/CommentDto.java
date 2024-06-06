@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString
 @AllArgsConstructor
+@ToString
 @Builder
 @EqualsAndHashCode
 public class CommentDto {

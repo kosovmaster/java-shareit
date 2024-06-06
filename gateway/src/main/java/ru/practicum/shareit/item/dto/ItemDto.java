@@ -15,19 +15,19 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-@ToString
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@Builder
 @EqualsAndHashCode
 public class ItemDto {
     @Positive(groups = Update.class)
     private Long id;
     @NotBlank(groups = Create.class)
-    @Size(max = 60)
+    @Size(max = 50, groups = Create.class)
     private String name;
     @NotBlank(groups = Create.class)
-    @Size(max = 150)
+    @Size(max = 200, groups = Create.class)
     private String description;
     @NotNull(groups = Create.class)
     private Boolean available;

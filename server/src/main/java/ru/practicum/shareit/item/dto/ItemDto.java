@@ -2,16 +2,12 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.*;
 
-/**
- * TODO Sprint add-controllers.
- */
-
 @Getter
 @Setter
-@ToString
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@Builder
 @EqualsAndHashCode
 public class ItemDto {
     private Long id;

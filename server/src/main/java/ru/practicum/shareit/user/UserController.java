@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
@@ -12,26 +11,21 @@ import java.util.Collection;
 import static ru.practicum.shareit.Constant.PAGE_FROM_DEFAULT;
 import static ru.practicum.shareit.Constant.PAGE_SIZE_DEFAULT;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
+@RequestMapping("/users")
 @RequiredArgsConstructor
-@RequestMapping(path = "/users")
-@Validated
 public class UserController {
-
     private final UserService userService;
+
+    @GetMapping("/{userId}")
+    public UserDto getUserById(@PathVariable Long userId) {
+        return userService.getUserById(userId);
+    }
 
     @GetMapping
     public Collection<UserDto> getAllUser(@RequestParam(defaultValue = PAGE_FROM_DEFAULT) Integer from,
                                           @RequestParam(defaultValue = PAGE_SIZE_DEFAULT) Integer size) {
         return userService.getAllUser(from, size);
-    }
-
-    @GetMapping("/{userId}")
-    public UserDto getUserById(@PathVariable Long userId) {
-        return userService.getUserById(userId);
     }
 
     @PostMapping
@@ -41,8 +35,7 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@PathVariable Long userId,
-                              @RequestBody UserDto userDto) {
+    public UserDto updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
         return userService.updateUser(userId, userDto);
     }
 

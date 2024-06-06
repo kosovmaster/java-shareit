@@ -17,10 +17,6 @@ public class ItemRequestMapper {
     private final ItemMapper itemMapper;
 
     public ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User requester, LocalDateTime created) {
-        if (itemRequestDto == null || requester == null || created == null) {
-            return null;
-        }
-
         return ItemRequest.builder()
                 .description(itemRequestDto.getDescription())
                 .requester(requester)
@@ -28,26 +24,19 @@ public class ItemRequestMapper {
                 .build();
     }
 
-    public List<ItemRequestDtoInfo> toItemRequestDtoInfoList(List<ItemRequest> itemRequests) {
-        if (itemRequests == null) {
-            return null;
-        }
-
-        return itemRequests.stream()
+    public List<ItemRequestDtoInfo> toItemRequestDtoInfoList(List<ItemRequest> allRequestsUser) {
+        return allRequestsUser.stream()
                 .map(this::toItemRequestDtoInfo)
                 .collect(Collectors.toList());
     }
 
     public ItemRequestDtoInfo toItemRequestDtoInfo(ItemRequest itemRequest) {
-        if (itemRequest == null) {
-            return null;
-        }
-
         return ItemRequestDtoInfo.builder()
                 .id(itemRequest.getId())
                 .description(itemRequest.getDescription())
                 .created(itemRequest.getCreated())
-                .items(itemRequest.getItems() == null ? new ArrayList<>() : itemMapper.toItemDtoCollection(itemRequest.getItems()))
+                .items(itemRequest.getItems() == null ?
+                        new ArrayList<>() : itemMapper.toItemDtoCollection(itemRequest.getItems()))
                 .build();
     }
 }

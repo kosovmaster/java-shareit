@@ -10,4 +10,5 @@ public class Constant {
     public static final String STATE_DEFAULT = "ALL";
     public static final String PAGE_FROM_DEFAULT = "0";
     public static final String PAGE_SIZE_DEFAULT = "10";
+
 }

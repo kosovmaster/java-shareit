@@ -4,12 +4,12 @@
   "end": "2023-05-22T21:09:45",
   "status": "WAITING",
   "booker": {
-    "name": "Ivan",
-    "email": "ivan@mail.ru"
+    "name": "Inna",
+    "email": "inna@mail.ru"
   },
   "item": {
-    "name": "hammer",
-    "description": "wooden hammer",
+    "name": "hoe",
+    "description": "garden hoe",
     "available": true,
     "request": null
   }

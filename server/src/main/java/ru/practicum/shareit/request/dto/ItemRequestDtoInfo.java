@@ -8,9 +8,9 @@ import java.util.Collection;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @ToString
 @Builder
-@AllArgsConstructor
 @EqualsAndHashCode
 public class ItemRequestDtoInfo {
     private Long id;

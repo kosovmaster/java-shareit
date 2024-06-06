@@ -8,10 +8,6 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-item-requests.
- */
-
 @Entity
 @Table(name = "request")
 @Getter
@@ -31,7 +27,7 @@ public class ItemRequest {
     private User requester;
     private LocalDateTime created;
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request_id")
     @ToString.Exclude
+    @JoinColumn(name = "request_id")
     private Collection<Item> items;
 }

@@ -4,10 +4,10 @@ import lombok.*;
 
 @Getter
 @Setter
-@ToString
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@Builder
 @EqualsAndHashCode
 public class UserDto {
     private Long id;

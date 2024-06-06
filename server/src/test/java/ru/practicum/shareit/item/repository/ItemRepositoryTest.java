@@ -1,5 +1,4 @@
-package ru.practicum.shareit.item;
-
+package ru.practicum.shareit.item.repository;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -37,14 +37,17 @@ public class ItemRepositoryTest {
     @BeforeEach
     public void setUp() {
         ownerOne = userRepository.save(new User(null, "Ivan", "ivan@mail.ru"));
-        ownerTwo = userRepository.save(new User(null, "John", "john@mail.ru"));
+        ownerTwo = userRepository.save(new User(null, "Lisa", "lisa@mail.ru"));
 
-        itemOne = itemRepository.save(new Item(null, "shovel", "sand shovel", true, ownerOne, null));
-        itemTwo = itemRepository.save(new Item(null, "hammer", "wooden hammer", true, ownerTwo, null));
-        itemThree = itemRepository.save(new Item(null, "saw", "metal saw", false, ownerTwo, null));
+        itemOne = itemRepository.save(new Item(null, "saw", "wood saw",
+                true, ownerOne, null));
+        itemTwo = itemRepository.save(new Item(null, "rake", "leaf rake",
+                true, ownerTwo, null));
+        itemThree = itemRepository.save(new Item(null, "hoe", "hoe",
+                false, ownerTwo, null));
     }
 
-    @DisplayName("Тест нахождения всех предметов пользователя по id")
+    @DisplayName("Должен найти все предметы по id владельца")
     @Test
     public void findAllByOwnerId() {
         Pageable pageable = getPageable(0, 10);
@@ -59,31 +62,38 @@ public class ItemRepositoryTest {
         assertThat(resultThree, hasSize(0));
     }
 
-    @DisplayName("Тест подтверждения или опровержения наличия по id вещи и владельца")
+    @DisplayName("Должен подтвердить или опровергнуть наличие вещи по ее id и id владельца")
     @Test
     public void existsByIdAndOwner_Id() {
-        boolean result1 = itemRepository.existsByIdAndOwner_Id(-1L, -1L);
-        boolean result2 = itemRepository.existsByIdAndOwner_Id(itemOne.getId(), ownerOne.getId());
+        boolean result = itemRepository.existsByIdAndOwner_Id(-1L, -1L);
+        boolean resultTwo = itemRepository.existsByIdAndOwner_Id(itemOne.getId(), ownerOne.getId());
 
-        assertFalse(result1);
-        assertTrue(result2);
+        assertFalse(result);
+        assertTrue(resultTwo);
     }
 
-    @DisplayName("Тест на нахождение свободного предмета в имени или описании")
+    @DisplayName("Должен найти по тексту свободные предметы, в имени или описании которых он есть")
     @Test
     public void findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase() {
         Pageable pageable = getPageable(0, 10);
-        String text1 = "GDFF";
-        String text2 = "dfgdr";
-        String text3 = "shovel";
+        String text = "RaK";
+        String textTwo = "lkjhgf";
+        String textThree = "hoe";
 
-        List<Item> items1 = itemRepository.findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase(text1, text1, pageable);
-        List<Item> items2 = itemRepository.findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase(text2, text2, pageable);
-        List<Item> items3 = itemRepository.findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase(text3, text3, pageable);
+        List<Item> result = itemRepository
+                .findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase(
+                        text, text, pageable);
+        List<Item> resultTwo = itemRepository
+                .findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase(
+                        textTwo, textTwo, pageable);
+        List<Item> resultThree = itemRepository
+                .findByAvailableTrueAndDescriptionContainsIgnoreCaseOrAvailableTrueAndNameContainsIgnoreCase(
+                        textThree, textThree, pageable);
 
-        assertThat(items1, hasSize(0));
-        assertThat(items2, hasSize(0));
-        assertThat(items3, hasSize(1));
+        assertThat(result, hasSize(1));
+        assertThat(result, contains(itemTwo));
+        assertThat(resultTwo, hasSize(0));
+        assertThat(resultThree, hasSize(0));
     }
 
     @AfterEach

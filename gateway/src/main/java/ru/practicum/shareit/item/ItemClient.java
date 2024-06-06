@@ -23,14 +23,15 @@ public class ItemClient extends BaseClient {
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
                         .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build());
+                        .build()
+        );
     }
 
     public ResponseEntity<Object> createItem(ItemDto itemDto, Long userId) {
         return post("", userId, itemDto);
     }
 
-    public ResponseEntity<Object> updateItem(ItemDto itemDto, Long userId, Long itemId) {
+    public ResponseEntity<Object> updateItem(ItemDto itemDto, Long itemId, Long userId) {
         return patch("/" + itemId, userId, itemDto);
     }
 
@@ -47,7 +48,6 @@ public class ItemClient extends BaseClient {
     public ResponseEntity<Object> findById(Long itemId, Long userId) {
         return get("/" + itemId, userId);
     }
-
 
     public ResponseEntity<Object> createComment(CommentDto commentDto, Long userId, Long itemId) {
         return post("/" + itemId + "/comment", userId, commentDto);

@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-@EqualsAndHashCode
 @ToString
 @Builder
+@EqualsAndHashCode
 public class BookingDtoCreate {
     private Long itemId;
     private LocalDateTime start;
