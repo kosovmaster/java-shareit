@@ -34,37 +34,39 @@ public class ItemRequestDtoTest {
         validator = factory.getValidator();
     }
 
-    @DisplayName("Сериализация объекта ItemRequestDto")
+    @DisplayName("Тест на корректную сериализацию объекта ItemRequestDto")
     @Test
     @SneakyThrows
     public void shouldSerialize() {
         ItemRequestDto itemRequestDto = ItemRequestDto.builder()
-                .description("need shovel")
+                .description("need hoe")
                 .build();
 
-        JsonContent<ItemRequestDto> itemRequestDtoJsonContent = this.json.write(itemRequestDto);
+        JsonContent<ItemRequestDto> itemRequestDtoJson = this.json.write(itemRequestDto);
 
-        assertThat(itemRequestDtoJsonContent).hasJsonPathValue("$.description");
-        assertThat(itemRequestDtoJsonContent).extractingJsonPathStringValue("$.description").isEqualTo("need shovel");
+        assertThat(itemRequestDtoJson).hasJsonPathValue("$.description");
+        assertThat(itemRequestDtoJson).extractingJsonPathStringValue("$.description")
+                .isEqualTo("need hoe");
     }
 
-    @DisplayName("Десериализация объекта ItemRequestDto")
+    @DisplayName("Тест на корректную десериализацию объекта ItemRequestDto")
     @Test
     @SneakyThrows
     public void shouldDeserialize() {
-        ItemRequestDto itemRequestDto = new ItemRequestDto("need shovel");
+        ItemRequestDto itemRequestDto = new ItemRequestDto("need hoe");
+
         var resource = new ClassPathResource("itemRequestDto.json");
         String content = Files.readString(resource.getFile().toPath());
+
         assertThat(this.json.parse(content)).isEqualTo(itemRequestDto);
     }
 
-    @DisplayName("Тест валидации объекта ItemRequestDto")
+    @DisplayName("Проверка корректной валидации объекта ItemRequestDto при создании и обновлении")
     @Test
-    public void shouldValidate() {
+    public void shouldValidation() {
         ItemRequestDto itemRequestDto = new ItemRequestDto("");
+        Set<ConstraintViolation<ItemRequestDto>> violations = validator.validate(itemRequestDto);
 
-        Set<ConstraintViolation<ItemRequestDto>> constraintViolations = validator.validate(itemRequestDto);
-
-        assertThat(constraintViolations).isNotEmpty();
+        assertThat(violations).isNotEmpty();
     }
 }

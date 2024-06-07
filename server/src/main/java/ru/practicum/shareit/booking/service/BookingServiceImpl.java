@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
     public Collection<BookingDto> getAllBookingsOwner(Long userId, BookingState bookingState,
                                                       Integer from, Integer size) {
         getUserIfTheExists(userId);
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Order.desc("start")));
+        Pageable pageable = PageRequest.of(from, size, Sort.by(Sort.Order.desc("start")));
         Collection<Booking> allBookings = getBookingsForOwner(bookingState, userId, pageable);
         log.info("Information about the bookings was obtained by the owner id={}", userId);
         return bookingMapper.toBookingDtoCollection(allBookings);

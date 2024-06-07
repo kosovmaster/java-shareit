@@ -14,7 +14,7 @@ import ru.practicum.shareit.booking.dto.BookingDtoCreate;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.practicum.shareit.Constant.DATE_TIME_FORMAT;
+import static ru.practicum.shareit.Constant.DATE_FORMAT;
 import static ru.practicum.shareit.Constant.FIXED_TIME;
 
 @JsonTest
@@ -26,7 +26,7 @@ public class BookingDtoCreateTest {
     @DisplayName("Тест на корректную сериализацию объекта BookingDtoCreate")
     @Test
     @SneakyThrows
-    public void serialize() {
+    public void shouldSerialize() {
         BookingDtoCreate bookingDtoCreate = BookingDtoCreate.builder()
                 .itemId(1L)
                 .start(FIXED_TIME)
@@ -37,20 +37,25 @@ public class BookingDtoCreateTest {
 
         assertThat(bookingDtoCreateJson).hasJsonPathValue("$.itemId");
         assertThat(bookingDtoCreateJson).extractingJsonPathValue("$.itemId").isEqualTo(1);
+
         assertThat(bookingDtoCreateJson).hasJsonPathValue("$.start");
-        assertThat(bookingDtoCreateJson).extractingJsonPathStringValue("$.start").isEqualTo(FIXED_TIME.format(DATE_TIME_FORMAT));
+        assertThat(bookingDtoCreateJson).extractingJsonPathStringValue("$.start")
+                .isEqualTo(FIXED_TIME.format(DATE_FORMAT));
+
         assertThat(bookingDtoCreateJson).hasJsonPathValue("$.end");
-        assertThat(bookingDtoCreateJson).extractingJsonPathStringValue("$.end").isEqualTo(FIXED_TIME.plusDays(3).format(DATE_TIME_FORMAT));
+        assertThat(bookingDtoCreateJson).extractingJsonPathStringValue("$.end")
+                .isEqualTo(FIXED_TIME.plusDays(3).format(DATE_FORMAT));
     }
 
     @DisplayName("Тест на корректную десериализацию объекта BookingDtoCreate")
     @Test
     @SneakyThrows
-    public void deserialize() {
+    public void shouldDeserialize() {
         BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, FIXED_TIME, FIXED_TIME.plusDays(3));
 
         var resource = new ClassPathResource("bookingDtoCreate.json");
         String content = Files.readString(resource.getFile().toPath());
+
         assertThat(this.json.parse(content)).isEqualTo(bookingDtoCreate);
     }
 }

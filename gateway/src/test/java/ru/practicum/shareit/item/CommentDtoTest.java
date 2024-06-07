@@ -20,7 +20,7 @@ import java.nio.file.Files;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.practicum.shareit.Constant.DATE_TIME_FORMAT;
+import static ru.practicum.shareit.Constant.DATE_FORMAT;
 import static ru.practicum.shareit.Constant.FIXED_TIME;
 
 @JsonTest
@@ -36,49 +36,51 @@ public class CommentDtoTest {
         validator = factory.getValidator();
     }
 
-    @DisplayName("Сериализация объекта CommentDto")
+    @DisplayName("Тест на корректную сериализацию объекта CommentDto")
     @Test
     @SneakyThrows
     public void shouldSerialize() {
         CommentDto commentDto = CommentDto.builder()
                 .text("ok")
-                .authorName("Ivan")
+                .authorName("Sofia")
                 .created(FIXED_TIME)
                 .itemId(1L)
                 .build();
 
-        JsonContent<CommentDto> commentDtoJsonContent = this.json.write(commentDto);
+        JsonContent<CommentDto> commentDtoJson = this.json.write(commentDto);
 
-        assertThat(commentDtoJsonContent).hasJsonPathValue("$.text");
-        assertThat(commentDtoJsonContent).extractingJsonPathStringValue("$.text").isEqualTo("ok");
+        assertThat(commentDtoJson).hasJsonPathValue("$.text");
+        assertThat(commentDtoJson).extractingJsonPathStringValue("$.text").isEqualTo("ok");
 
-        assertThat(commentDtoJsonContent).hasJsonPathValue("$.authorName");
-        assertThat(commentDtoJsonContent).extractingJsonPathStringValue("$.authorName").isEqualTo("Ivan");
+        assertThat(commentDtoJson).hasJsonPathValue("$.authorName");
+        assertThat(commentDtoJson).extractingJsonPathStringValue("$.authorName").isEqualTo("Sofia");
 
-        assertThat(commentDtoJsonContent).hasJsonPathValue("$.created");
-        assertThat(commentDtoJsonContent).extractingJsonPathStringValue("$.created").isEqualTo(FIXED_TIME.format(DATE_TIME_FORMAT));
+        assertThat(commentDtoJson).hasJsonPathValue("$.created");
+        assertThat(commentDtoJson).extractingJsonPathStringValue("$.created")
+                .isEqualTo(FIXED_TIME.format(DATE_FORMAT));
 
-        assertThat(commentDtoJsonContent).hasJsonPathValue("$.itemId");
-        assertThat(commentDtoJsonContent).extractingJsonPathValue("$.itemId").isEqualTo(1);
+        assertThat(commentDtoJson).hasJsonPathValue("$.itemId");
+        assertThat(commentDtoJson).extractingJsonPathValue("$.itemId").isEqualTo(1);
     }
 
-    @DisplayName("Десериализация объекта CommentDto")
+    @DisplayName("Тест на корректную десериализацию объекта CommentDto")
     @Test
     @SneakyThrows
     public void shouldDeserialize() {
-        CommentDto commentDto = new CommentDto(null, "ok", "Ivan", FIXED_TIME, 1L);
+        CommentDto commentDto = new CommentDto(null, "ok", "Sofia", FIXED_TIME, 1L);
+
         var resource = new ClassPathResource("commentDto.json");
         String content = Files.readString(resource.getFile().toPath());
+
         assertThat(this.json.parse(content)).isEqualTo(commentDto);
     }
 
-    @DisplayName("Тест валидации объекта CommentDto")
+    @DisplayName("Проверка корректной валидации объекта CommentDto при создании и обновлении")
     @Test
-    public void shouldValidate() {
+    public void shouldValidation() {
         CommentDto commentDto = new CommentDto(null, "", null, null, null);
+        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
 
-        Set<ConstraintViolation<CommentDto>> constraintViolations = validator.validate(commentDto);
-
-        assertThat(constraintViolations).isNotEmpty();
+        assertThat(violations).isNotEmpty();
     }
 }

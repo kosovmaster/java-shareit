@@ -36,48 +36,50 @@ public class ItemDtoTest {
         validator = factory.getValidator();
     }
 
-    @DisplayName("Сериализация объекта ItemDto")
+    @DisplayName("Тест на корректную сериализацию объекта ItemDto")
     @Test
     @SneakyThrows
     public void shouldSerialize() {
         ItemDto itemDto = ItemDto.builder()
-                .name("shovel")
-                .description("sand shovel")
+                .name("hoe")
+                .description("garden hoe")
                 .available(true)
                 .build();
 
-        JsonContent<ItemDto> itemDtoJsonContent = this.json.write(itemDto);
+        JsonContent<ItemDto> itemDtoJson = this.json.write(itemDto);
 
-        assertThat(itemDtoJsonContent).hasJsonPathValue("$.name");
-        assertThat(itemDtoJsonContent).extractingJsonPathStringValue("$.name").isEqualTo("shovel");
+        assertThat(itemDtoJson).hasJsonPathValue("$.name");
+        assertThat(itemDtoJson).extractingJsonPathStringValue("$.name").isEqualTo("hoe");
 
-        assertThat(itemDtoJsonContent).hasJsonPathValue("$.description");
-        assertThat(itemDtoJsonContent).extractingJsonPathStringValue("$.description").isEqualTo("sand shovel");
+        assertThat(itemDtoJson).hasJsonPathValue("$.description");
+        assertThat(itemDtoJson).extractingJsonPathStringValue("$.description").isEqualTo("garden hoe");
 
-        assertThat(itemDtoJsonContent).hasJsonPathValue("$.available");
-        assertThat(itemDtoJsonContent).extractingJsonPathBooleanValue("$.available").isEqualTo(true);
+        assertThat(itemDtoJson).hasJsonPathValue("$.available");
+        assertThat(itemDtoJson).extractingJsonPathBooleanValue("$.available").isEqualTo(true);
     }
 
-    @DisplayName("Десериализация объекта ItemDto")
+    @DisplayName("Тест на корректную десериализацию объекта ItemDto")
     @Test
     @SneakyThrows
     public void shouldDeserialize() {
-        ItemDto itemDto = new ItemDto(null, "shovel", "sand shovel", true, null);
+        ItemDto itemDto = new ItemDto(null, "hoe", "garden hoe", true, null);
+
         var resource = new ClassPathResource("itemDto.json");
         String content = Files.readString(resource.getFile().toPath());
+
         assertThat(this.json.parse(content)).isEqualTo(itemDto);
     }
 
-    @DisplayName("Тест валидации объекта ItemDto")
+    @DisplayName("Проверка корректной валидации объекта ItemDto при создании и обновлении")
     @Test
-    public void shouldValidate() {
+    public void shouldValidation() {
         ItemDto itemDto = new ItemDto(0L, "", "", null, 0L);
-        ItemDto itemDto2 = new ItemDto(-1L, "shovel", "sand shovel", true, 1L);
+        ItemDto itemDtoTwo = new ItemDto(-1L, "hoe", "garden hoe", true, 1L);
 
-        Set<ConstraintViolation<ItemDto>> constraintViolations = validator.validate(itemDto, Create.class);
-        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto2, Update.class);
+        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto, Create.class);
+        Set<ConstraintViolation<ItemDto>> violationsTwo = validator.validate(itemDtoTwo, Update.class);
 
-        assertThat(constraintViolations).isNotEmpty();
         assertThat(violations).isNotEmpty();
+        assertThat(violationsTwo).isNotEmpty();
     }
 }

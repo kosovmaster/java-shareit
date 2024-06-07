@@ -28,45 +28,12 @@ public class BookingValidationTest {
     @Autowired
     protected ObjectMapper mapper;
 
-    @DisplayName("Должен выбросить исключение для владельца при неизвесном состоянии букинга")
+    @DisplayName("Не должен создать бронирование, если время окончания раньше времени начала")
     @Test
     @SneakyThrows
-    public void returnExceptionOwnerForUnknownState() {
-        mvc.perform(get("/bookings/owner?state=ERROR")
-                        .header(USER_HEADER, 1L))
-                .andExpect(status().is(400));
-    }
-
-    @DisplayName("Должен выбросить исключение для владельца при неизвесном состоянии букинга")
-    @Test
-    @SneakyThrows
-    public void returnExceptionBookerForUnknownState() {
-        mvc.perform(get("/bookings?state=ERROR")
-                        .header(USER_HEADER, 1L))
-                .andExpect(status().is(400));
-    }
-
-    @DisplayName("Не должен создавать бронирование, если id меньше 1")
-    @Test
-    @SneakyThrows
-    public void notCreateBookingIfItemIdLessOne() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(-5L,
-                FIXED_TIME.plusDays(1), FIXED_TIME.plusDays(2));
-        mvc.perform(post("/bookings")
-                        .content(mapper.writeValueAsString(bookingDtoCreate))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_HEADER, 1L))
-                .andExpect(status().is(400));
-    }
-
-    @DisplayName("Не должен создавать бронирование, если время окончание в прошлом времени")
-    @Test
-    @SneakyThrows
-    public void notCreateBookingIfTimeEndInPast() {
+    public void shouldNotCreateBookingIfTimeEndBeforeTimeStart() {
         BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
-                FIXED_TIME.minusDays(5), FIXED_TIME.minusDays(1));
+                FIXED_TIME.plusDays(2), FIXED_TIME.plusDays(1));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
@@ -77,12 +44,11 @@ public class BookingValidationTest {
                 .andExpect(status().is(400));
     }
 
-    @DisplayName("Не должен создавать бронирование, если время начала в прошлом времени")
+    @DisplayName("Не должен создать бронирование, если время начала или время окончания равно null")
     @Test
     @SneakyThrows
-    public void notCreateBookingIfTimeStartInPast() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
-                FIXED_TIME.minusDays(5), FIXED_TIME.plusDays(2));
+    public void shouldNotCreateBookingIfTimeStartOrTimeEndEqualsNull() {
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, null, null);
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
@@ -93,10 +59,10 @@ public class BookingValidationTest {
                 .andExpect(status().is(400));
     }
 
-    @DisplayName("Не должен создавать бронирование, если время начала и конца равны")
+    @DisplayName("Не должен создать бронирование, если время начала и время окончания совпадают")
     @Test
     @SneakyThrows
-    public void notCreateBookingIfTimeStartAndTimeEndEquals() {
+    public void shouldNotCreateBookingIfTimeStartAndTimeEndEquals() {
         BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
                 FIXED_TIME.plusDays(2), FIXED_TIME.plusDays(2));
 
@@ -109,11 +75,12 @@ public class BookingValidationTest {
                 .andExpect(status().is(400));
     }
 
-    @DisplayName("Не должен создавать бронирование, если начало и окончание равно null")
+    @DisplayName("Не должен создать бронирование, если время начала находится в прошлом")
     @Test
     @SneakyThrows
-    public void notCreateBookingIfTimeStartOrTimeEndEqualsNull() {
-        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L, null, null);
+    public void shouldNotCreateBookingIfTimeStartInPast() {
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
+                FIXED_TIME.minusDays(5), FIXED_TIME.plusDays(1));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
@@ -124,18 +91,52 @@ public class BookingValidationTest {
                 .andExpect(status().is(400));
     }
 
-    @DisplayName("Не должен создавать бронирование, если начальное время поздней конечного")
+    @DisplayName("Не должен создать бронирование, если время окончания находится в прошлом")
     @Test
     @SneakyThrows
-    public void notCreateBookingIfTimeEndBeforeTimeStart() {
+    public void shouldNotCreateBookingIfTimeEndInPast() {
         BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(1L,
-                FIXED_TIME.plusDays(2), FIXED_TIME.plusDays(1));
+                FIXED_TIME.minusDays(5), FIXED_TIME.minusDays(1));
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDtoCreate))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_HEADER, 1L))
+                .andExpect(status().is(400));
+    }
+
+    @DisplayName("Не должен создать бронирование, если id вещи меньше 1")
+    @Test
+    @SneakyThrows
+    public void shouldNotCreateBookingIfItemIdLessOne() {
+        BookingDtoCreate bookingDtoCreate = new BookingDtoCreate(-5L,
+                FIXED_TIME.plusDays(1), FIXED_TIME.plusDays(2));
+
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingDtoCreate))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_HEADER, 1L))
+                .andExpect(status().is(400));
+    }
+
+    @DisplayName("Должно выброситься исключение пользователю при неизвестном состоянии букинга")
+    @Test
+    @SneakyThrows
+    public void shouldReturnExceptionBookerForUnknownState() {
+        mvc.perform(get("/bookings?state=ERROR")
+                        .header(USER_HEADER, 1L))
+                .andExpect(status().is(400));
+    }
+
+    @DisplayName("Должно выброситься исключение владельцу вещи при неизвестном состоянии букинга")
+    @Test
+    @SneakyThrows
+    public void shouldReturnExceptionOwnerForUnknownState() {
+        mvc.perform(get("/bookings/owner?state=ERROR")
                         .header(USER_HEADER, 1L))
                 .andExpect(status().is(400));
     }

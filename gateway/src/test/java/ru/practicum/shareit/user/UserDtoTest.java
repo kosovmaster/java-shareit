@@ -11,6 +11,7 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.core.io.ClassPathResource;
 import ru.practicum.shareit.config.Create;
+import ru.practicum.shareit.config.Update;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.ConstraintViolation;
@@ -35,43 +36,46 @@ public class UserDtoTest {
         validator = factory.getValidator();
     }
 
-    @DisplayName("Сериализация объекта UserDto")
+    @DisplayName("Тест на корректную сериализацию объекта UserDto")
     @Test
     @SneakyThrows
     public void shouldSerialize() {
         UserDto userDto = UserDto.builder()
-                .name("Ivan")
-                .email("ivan@email.com")
+                .name("Inna")
+                .email("inna@mail.ru")
                 .build();
 
-        JsonContent<UserDto> userDtoJsonContent = this.json.write(userDto);
+        JsonContent<UserDto> userDtoJson = this.json.write(userDto);
 
-        assertThat(userDtoJsonContent).hasJsonPathValue("$.name");
-        assertThat(userDtoJsonContent).extractingJsonPathStringValue("$.name").isEqualTo("Ivan");
-        assertThat(userDtoJsonContent).hasJsonPathValue("$.email");
-        assertThat(userDtoJsonContent).extractingJsonPathStringValue("$.email").isEqualTo("ivan@email.com");
+        assertThat(userDtoJson).hasJsonPathValue("$.name");
+        assertThat(userDtoJson).extractingJsonPathStringValue("$.name").isEqualTo("Inna");
+
+        assertThat(userDtoJson).hasJsonPathValue("$.email");
+        assertThat(userDtoJson).extractingJsonPathStringValue("$.email").isEqualTo("inna@mail.ru");
     }
 
-    @DisplayName("Десериализация объекта UserDto")
+    @DisplayName("Тест на корректную десериализацию объекта UserDto")
     @Test
     @SneakyThrows
     public void shouldDeserialize() {
-        UserDto userDto = new UserDto(null, "Ivan", "ivan@email.com");
+        UserDto userDto = new UserDto(null, "Inna", "inna@mail.ru");
+
         var resource = new ClassPathResource("userDto.json");
         String content = Files.readString(resource.getFile().toPath());
+
         assertThat(this.json.parse(content)).isEqualTo(userDto);
     }
 
-    @DisplayName("Тест валидации объекта UserDto")
+    @DisplayName("Проверка корректной валидации объекта UserDto при создании и обновлении")
     @Test
-    public void shouldValidate() {
-        UserDto userDtoFirst = new UserDto(null, "", "");
-        UserDto userDtoSecond = new UserDto(null, "Ivan", "com");
+    public void shouldValidation() {
+        UserDto userDto = new UserDto(null, "", "");
+        UserDto userDtoTwo = new UserDto(null, "Inna", "kjl");
 
-        Set<ConstraintViolation<UserDto>> constraintViolations = validator.validate(userDtoFirst, Create.class);
-        Set<ConstraintViolation<UserDto>> constraintViolationSet = validator.validate(userDtoSecond, Create.class);
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto, Create.class);
+        Set<ConstraintViolation<UserDto>> violationsTwo = validator.validate(userDtoTwo, Update.class);
 
-        assertThat(constraintViolations).isNotEmpty();
-        assertThat(constraintViolationSet).isNotEmpty();
+        assertThat(violations).isNotEmpty();
+        assertThat(violationsTwo).isNotEmpty();
     }
 }
