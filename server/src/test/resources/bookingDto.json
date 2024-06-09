@@ -1,0 +1,16 @@
+{
+  "id": "1",
+  "start": "2023-05-19T21:09:45",
+  "end": "2023-05-22T21:09:45",
+  "status": "WAITING",
+  "booker": {
+    "name": "Inna",
+    "email": "inna@mail.ru"
+  },
+  "item": {
+    "name": "hoe",
+    "description": "garden hoe",
+    "available": true,
+    "request": null
+  }
+}
